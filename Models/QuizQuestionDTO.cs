@@ -17,7 +17,15 @@ namespace QuizApi.Models
         public Part Section { get; set; }
         public GKUnit GKUnitNum { get; set; }
         public TamilUnit TamilUnitNum { get; set; }
-        public MathsUnit MathsUnitNum { get; set; }        
+        public MathsUnit MathsUnitNum { get; set; }
+        public bool IsMatchQuestion { get; set; } = false;
+        public List<MatchItemDTO>? MatchItems { get; set; }        
     }
     
+    public class MatchItemDTO
+    {
+        public required string Label { get; set; }
+        public required string Text { get; set; }
+        public bool IsLeftOption { get; set; }
+    }
 }

@@ -45,6 +45,7 @@ namespace QuizApi.Controllers
 
         [HttpPost]
         public IActionResult AddQuestion(QuizQuestionDTO QuizQuestion){
+            Guid questionId = Guid.NewGuid();
             List<Option> optionsList = new List<Option>();
             
             CorrectOption cp = new CorrectOption();
@@ -60,22 +61,73 @@ namespace QuizApi.Controllers
             }
             cp.CorrectOptionId=Guid.NewGuid();
             cp.CorrectOptionValue = QuizQuestion.CorrectOptionValue;
+            
             Quiz newQuestion = new Quiz(){
-                Id= Guid.NewGuid(),
+                Id= questionId,
                 Question= QuizQuestion.Question,
+                IsMatchQuestion= QuizQuestion.IsMatchQuestion,
                 Options= optionsList,
                 QnCorrectOption= cp,
-                CorrectOptionType= QuizQuestion.CorrectOptionType, 
-                QnCategory = new Category(){
-                        Section=QuizQuestion.Section,
-                        GKUnitName=QuizQuestion.GKUnitNum,
-                        TamilUnitName=QuizQuestion.TamilUnitNum,
-                        MathsUnitName=QuizQuestion.MathsUnitNum
-                        }
-                };                       
+                CorrectOptionType= QuizQuestion.CorrectOptionType
+            };
+            
+            // Conditionally create Category only if Section is not 0 and not NA
+            if(QuizQuestion.Section != 0 && QuizQuestion.Section != Part.NA)
+            {
+                newQuestion.QnCategory = new Category(){
+                    Section=QuizQuestion.Section,
+                    GKUnitName=QuizQuestion.GKUnitNum,
+                    TamilUnitName=QuizQuestion.TamilUnitNum,
+                    MathsUnitName=QuizQuestion.MathsUnitNum
+                };
+            }
+            
+            // If Match question, fill MatchQuestion object
+            if(QuizQuestion.IsMatchQuestion && QuizQuestion.MatchItems != null)
+            {
+                List<MatchItem> matchItems = new List<MatchItem>();
+                foreach(var item in QuizQuestion.MatchItems)
+                {
+                    matchItems.Add(new MatchItem(){
+                        Id = Guid.NewGuid(),
+                        MatchQuestionId = questionId,
+                        Label = item.Label,
+                        Text = item.Text,
+                        IsLeftOption = item.IsLeftOption
+                    });
+                }
+                
+                newQuestion.MatchQuestion = new MatchQuestion(){
+                    Id = Guid.NewGuid(),
+                    QnId = questionId,
+                    MatchItems = matchItems
+                };
+            }
+                       
             _dbContext.Quiz.Add(newQuestion);
             _dbContext.SaveChanges();
             return Ok(newQuestion);
+        }
+
+        [HttpGet]
+        [Route("export")]
+        public IActionResult ExportAllQuestions(){
+            var exportData = _dbContext.Quiz
+                    .Select(quiz => new QuizQuestionDTO{
+                        Question = quiz.Question,
+                        OptionValues = quiz.Options.Select(o => o.OptionValue).ToArray(),
+                        CorrectOptionValue = quiz.QnCorrectOption.CorrectOptionValue,
+                        CorrectOptionType = quiz.CorrectOptionType,
+                        IsMatchQuestion = false,
+                        MatchItems = null,
+                        Section = quiz.QnCategory.Section,
+                        GKUnitNum = quiz.QnCategory.GKUnitName,
+                        TamilUnitNum = quiz.QnCategory.TamilUnitName,
+                        MathsUnitNum = quiz.QnCategory.MathsUnitName
+                    })
+                    .ToList();
+            
+            return Ok(exportData);
         }
 
         [HttpDelete]

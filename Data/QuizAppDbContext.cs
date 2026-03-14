@@ -27,10 +27,26 @@ namespace QuizApi.Data
             .WithOne()        
             .HasForeignKey<Category>(c => c.QnId)    
             .OnDelete(DeleteBehavior.Cascade);
+        
+        // Configure MatchQuestion relationship
+        modelBuilder.Entity<Quiz>()
+            .HasOne(p=>p.MatchQuestion)
+            .WithOne()
+            .HasForeignKey<MatchQuestion>(m => m.QnId)
+            .OnDelete(DeleteBehavior.Cascade);
+        
+        // Configure MatchItem relationship
+        modelBuilder.Entity<MatchQuestion>()
+            .HasMany(m => m.MatchItems)
+            .WithOne()
+            .HasForeignKey(mi => mi.MatchQuestionId)
+            .OnDelete(DeleteBehavior.Cascade);
          }
          
         public DbSet<Quiz> Quiz { get; set;  }
         public DbSet<Test> TestData { get; set; }
+        public DbSet<MatchQuestion> MatchQuestions { get; set; }
+        public DbSet<MatchItem> MatchItems { get; set; }
     }
 }
 

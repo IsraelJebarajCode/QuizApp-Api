@@ -15,5 +15,6 @@ namespace QuizApi.Models
         public CorrectOption QnCorrectOption { get; set; }
         public required string CorrectOptionType { get; set; }
         public Category? QnCategory { get; set; }
+        public AnswerExplanation? AnsExplanation { get; set; }
       }
 }

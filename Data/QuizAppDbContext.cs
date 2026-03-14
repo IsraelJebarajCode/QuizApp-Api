@@ -41,12 +41,20 @@ namespace QuizApi.Data
             .WithOne()
             .HasForeignKey(mi => mi.MatchQuestionId)
             .OnDelete(DeleteBehavior.Cascade);
+        
+        // Configure AnswerExplanation relationship
+        modelBuilder.Entity<Quiz>()
+            .HasOne(p => p.AnsExplanation)
+            .WithOne()
+            .HasForeignKey<AnswerExplanation>(a => a.QnId)
+            .OnDelete(DeleteBehavior.Cascade);
          }
          
         public DbSet<Quiz> Quiz { get; set;  }
         public DbSet<Test> TestData { get; set; }
         public DbSet<MatchQuestion> MatchQuestions { get; set; }
         public DbSet<MatchItem> MatchItems { get; set; }
+        public DbSet<AnswerExplanation> AnswerExplanations { get; set; }
     }
 }
 

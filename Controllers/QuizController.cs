@@ -26,6 +26,9 @@ namespace QuizApi.Controllers
                     .Include(x=>x.Options)
                     .Include(y=>y.QnCorrectOption)
                     .Include(z=>z.QnCategory)
+                    .Include(m => m.MatchQuestion)
+                    .ThenInclude(mi=>mi.MatchItems)
+                    .Include(e=>e.AnsExplanation)
                     .ToList();
             return Ok(Questions);
         }
@@ -103,10 +106,33 @@ namespace QuizApi.Controllers
                     MatchItems = matchItems
                 };
             }
+            
+            // If AnswerExplanation provided, add it
+            if(QuizQuestion.AnsExplanation != null && 
+               (!string.IsNullOrEmpty(QuizQuestion.AnsExplanation.Image) || 
+                !string.IsNullOrEmpty(QuizQuestion.AnsExplanation.Description)))
+            {
+                newQuestion.AnsExplanation = new AnswerExplanation(){
+                    Id = Guid.NewGuid(),
+                    Image = !string.IsNullOrEmpty(QuizQuestion.AnsExplanation.Image) ? QuizQuestion.AnsExplanation.Image : null,
+                    Description = !string.IsNullOrEmpty(QuizQuestion.AnsExplanation.Description) ? QuizQuestion.AnsExplanation.Description : null
+                };
+            }
                        
             _dbContext.Quiz.Add(newQuestion);
             _dbContext.SaveChanges();
             return Ok(newQuestion);
+        }
+
+        [HttpGet]
+        [Route("match-qns")]
+        public IActionResult GetAllMatchQuestions(){
+            var matchQns = _dbContext.Quiz
+                            .Where(q => q.IsMatchQuestion == true)
+                            .Include(m => m.MatchQuestion)
+                            .ThenInclude(mi => mi.MatchItems)
+                            .ToList();
+            return Ok(matchQns);
         }
 
         [HttpGet]
@@ -123,7 +149,11 @@ namespace QuizApi.Controllers
                         Section = quiz.QnCategory.Section,
                         GKUnitNum = quiz.QnCategory.GKUnitName,
                         TamilUnitNum = quiz.QnCategory.TamilUnitName,
-                        MathsUnitNum = quiz.QnCategory.MathsUnitName
+                        MathsUnitNum = quiz.QnCategory.MathsUnitName,
+                        // AnsExplanation = quiz.AnsExplanation != null ? new AnswerExplanationDTO{
+                        //     Image = quiz.AnsExplanation.Image,
+                        //     Description = quiz.AnsExplanation.Description
+                        // } : null
                     })
                     .ToList();
             

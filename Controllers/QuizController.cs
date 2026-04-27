@@ -135,6 +135,22 @@ namespace QuizApi.Controllers
             return Ok(matchQns);
         }
 
+        [HttpPost]
+        [Route("upload-multiple")]
+        public IActionResult UploadMulitpleQuestion(List<QuizQuestionDTO> questions)
+        {
+            try
+            {
+                questions.ForEach(question =>{
+                    AddQuestion(question);                
+                });
+                return Ok();
+            }
+            catch(System.Exception ex)
+            {
+                return StatusCode(500, ex.Message);
+            }
+        }
         [HttpGet]
         [Route("export")]
         public IActionResult ExportAllQuestions(){

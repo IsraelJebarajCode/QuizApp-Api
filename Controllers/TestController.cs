@@ -19,27 +19,40 @@ namespace QuizApi.Controllers
             this._dbContext = dbContext;
         }
         [HttpGet]
-        public IActionResult GetAllTests(){
+        public IActionResult GetAllTests()
+        {
             return Ok(_dbContext.TestData.ToList());
         }
 
         [HttpGet]
-        [Route("get/{id:guid}")]
-        public IActionResult GetTestById(Guid id){
+        [Route("{id:guid}")]
+        public IActionResult GetTestDetailsById(Guid id)
+        {
+            var test = _dbContext.TestData.Find(id);
+            if (test is null)
+                return NotFound();
+            return Ok(test);
+        }
+
+        [HttpGet]
+        [Route("questions/{id:guid}")]
+        public IActionResult GetTestById(Guid id)
+        {
             List<Guid> QnIds = _dbContext.TestData.Find(id).QnIds;
-           var TestQuestions = _dbContext.Quiz
-                                    .Where(qn=> QnIds.Contains(qn.Id))
-                                    .Include(x=>x.Options)
-                                    .Include(y=>y.QnCorrectOption)
-                                    .Include(z=>z.QnCategory)
-                                    .ToList();
+            var TestQuestions = _dbContext.Quiz
+                                     .Where(qn => QnIds.Contains(qn.Id))
+                                     .Include(x => x.Options)
+                                     .Include(y => y.QnCorrectOption)
+                                     .Include(z => z.QnCategory)
+                                     .ToList();
 
             return Ok(TestQuestions);
         }
-        
+
         [HttpPost]
         [Route("create")]
-        public IActionResult CreateTest(Test NewTest){
+        public IActionResult CreateTest(Test NewTest)
+        {
             _dbContext.TestData.Add(NewTest);
             _dbContext.SaveChanges();
             return Ok(NewTest);
@@ -53,9 +66,10 @@ namespace QuizApi.Controllers
         }
 
         [HttpDelete]
-        public IActionResult DeleteTest(Guid id){
-            var  test = _dbContext.TestData.Find(id);                     
-            if(test is null)
+        public IActionResult DeleteTest(Guid id)
+        {
+            var test = _dbContext.TestData.Find(id);
+            if (test is null)
                 return NotFound();
             _dbContext.TestData.Remove(test);
             _dbContext.SaveChanges();

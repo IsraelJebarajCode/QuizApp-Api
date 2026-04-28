@@ -26,6 +26,7 @@ namespace QuizApi.Controllers
                     .Include(x=>x.Options)
                     .Include(y=>y.QnCorrectOption)
                     .Include(z=>z.QnCategory)
+                    .Include(a=>a.AnswerKeyExplanation)
                     .ToList();
             return Ok(Questions);
         }
@@ -36,7 +37,8 @@ namespace QuizApi.Controllers
                              .Where(qu=>qu.QnCategory.Section==sectionid)
                              .Include(x =>x.QnCorrectOption)
                              .Include(y=>y.Options) 
-                             .Include(z=>z.QnCategory)                            
+                             .Include(z=>z.QnCategory)
+                             .Include(a=>a.AnswerKeyExplanation)
                              .ToList();
 
 
@@ -72,7 +74,15 @@ namespace QuizApi.Controllers
                         TamilUnitName=QuizQuestion.TamilUnitNum,
                         MathsUnitName=QuizQuestion.MathsUnitNum
                         }
-                };                       
+                };
+            if (!string.IsNullOrEmpty(QuizQuestion.AnswerExplanationHtml))
+            {
+                newQuestion.AnswerKeyExplanation = new AnswerKeyExplanation
+                {
+                    QuestionId = newQuestion.Id,
+                    AnswerExplanationHtml = QuizQuestion.AnswerExplanationHtml
+                };
+            }
             _dbContext.Quiz.Add(newQuestion);
             _dbContext.SaveChanges();
             return Ok(newQuestion);

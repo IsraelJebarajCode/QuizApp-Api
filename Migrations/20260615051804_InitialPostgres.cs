@@ -1,12 +1,14 @@
 ﻿using System;
+using System.Collections.Generic;
 using Microsoft.EntityFrameworkCore.Migrations;
+using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
 #nullable disable
 
 namespace QuizApp.Migrations
 {
     /// <inheritdoc />
-    public partial class Initial : Migration
+    public partial class InitialPostgres : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -15,9 +17,9 @@ namespace QuizApp.Migrations
                 name: "Quiz",
                 columns: table => new
                 {
-                    Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    Question = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    CorrectOptionType = table.Column<string>(type: "nvarchar(max)", nullable: false)
+                    Id = table.Column<Guid>(type: "uuid", nullable: false),
+                    Question = table.Column<string>(type: "text", nullable: false),
+                    CorrectOptionType = table.Column<string>(type: "text", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -28,8 +30,13 @@ namespace QuizApp.Migrations
                 name: "TestData",
                 columns: table => new
                 {
-                    Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    QnIds = table.Column<string>(type: "nvarchar(max)", nullable: false)
+                    Id = table.Column<Guid>(type: "uuid", nullable: false),
+                    TestName = table.Column<string>(type: "text", nullable: false),
+                    TestDescription = table.Column<string>(type: "text", nullable: true),
+                    IsSectionTest = table.Column<bool>(type: "boolean", nullable: false),
+                    Section = table.Column<int>(type: "integer", nullable: true),
+                    TotalTimeInMins = table.Column<int>(type: "integer", nullable: true),
+                    QnIds = table.Column<List<Guid>>(type: "uuid[]", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -40,10 +47,14 @@ namespace QuizApp.Migrations
                 name: "Category",
                 columns: table => new
                 {
-                    Id = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
-                    Section = table.Column<int>(type: "int", nullable: false),
-                    QnId = table.Column<Guid>(type: "uniqueidentifier", nullable: false)
+                    Id = table.Column<int>(type: "integer", nullable: false)
+                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
+                    Section = table.Column<int>(type: "integer", nullable: false),
+                    GKUnitName = table.Column<int>(type: "integer", nullable: false),
+                    TamilUnitName = table.Column<int>(type: "integer", nullable: false),
+                    MathsUnitName = table.Column<int>(type: "integer", nullable: false),
+                    SclBookStandard = table.Column<int>(type: "integer", nullable: false),
+                    QnId = table.Column<Guid>(type: "uuid", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -60,10 +71,10 @@ namespace QuizApp.Migrations
                 name: "CorrectOption",
                 columns: table => new
                 {
-                    CorrectOptionId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    CorrectOptionValue = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    CorrOptionId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    QnId = table.Column<Guid>(type: "uniqueidentifier", nullable: false)
+                    CorrectOptionId = table.Column<Guid>(type: "uuid", nullable: false),
+                    CorrectOptionValue = table.Column<string>(type: "text", nullable: false),
+                    CorrOptionId = table.Column<Guid>(type: "uuid", nullable: false),
+                    QnId = table.Column<Guid>(type: "uuid", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -80,9 +91,9 @@ namespace QuizApp.Migrations
                 name: "Option",
                 columns: table => new
                 {
-                    OptionId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    OptionValue = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    QuizId = table.Column<Guid>(type: "uniqueidentifier", nullable: true)
+                    OptionId = table.Column<Guid>(type: "uuid", nullable: false),
+                    OptionValue = table.Column<string>(type: "text", nullable: false),
+                    QuizId = table.Column<Guid>(type: "uuid", nullable: true)
                 },
                 constraints: table =>
                 {

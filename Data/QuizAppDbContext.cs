@@ -27,9 +27,15 @@ namespace QuizApi.Data
             .WithOne()        
             .HasForeignKey<Category>(c => c.QnId)    
             .OnDelete(DeleteBehavior.Cascade);
+        modelBuilder.Entity<Quiz>()
+            .HasOne(p => p.AnswerKeyExplanation)
+            .WithOne()
+            .HasForeignKey<AnswerKeyExplanation>(e => e.QuestionId)
+            .OnDelete(DeleteBehavior.Cascade);
          }
          
         public DbSet<Quiz> Quiz { get; set;  }
+        public DbSet<AnswerKeyExplanation> AnswerKeyExplanations { get; set; }
         public DbSet<Test> TestData { get; set; }
     }
 }

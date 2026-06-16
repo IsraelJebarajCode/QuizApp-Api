@@ -73,7 +73,9 @@ namespace QuizApi.Controllers
                         GKUnitName=QuizQuestion.GKUnitNum,
                         TamilUnitName=QuizQuestion.TamilUnitNum,
                         MathsUnitName=QuizQuestion.MathsUnitNum
-                }
+                },
+                CreatedAt = DateTime.UtcNow,
+                LastModifiedAt = DateTime.UtcNow
             };
             if (!string.IsNullOrEmpty(QuizQuestion.AnswerKeyExplanationHtml))
             {
@@ -110,6 +112,7 @@ namespace QuizApi.Controllers
             // Update basic fields
             existingQuiz.Question = UpdatedQueston.Question;
             existingQuiz.CorrectOptionType = UpdatedQueston.CorrectOptionType;
+            existingQuiz.LastModifiedAt = DateTime.UtcNow;
 
             // Handle AnswerKeyExplanation: only update if explicitly provided
             if (UpdatedQueston.AnswerKeyExplanation != null)

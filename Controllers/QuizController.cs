@@ -26,6 +26,7 @@ namespace QuizApi.Controllers
                     .Include(x=>x.Options)
                     .Include(y=>y.QnCorrectOption)
                     .Include(z=>z.QnCategory)
+                    .Include(a=>a.AnswerKeyExplanation)
                     .ToList();
             return Ok(Questions);
         }
@@ -36,7 +37,8 @@ namespace QuizApi.Controllers
                              .Where(qu=>qu.QnCategory.Section==sectionid)
                              .Include(x =>x.QnCorrectOption)
                              .Include(y=>y.Options) 
-                             .Include(z=>z.QnCategory)                            
+                             .Include(z=>z.QnCategory)
+                             .Include(a=>a.AnswerKeyExplanation)                        
                              .ToList();
 
 
@@ -71,8 +73,18 @@ namespace QuizApi.Controllers
                         GKUnitName=QuizQuestion.GKUnitNum,
                         TamilUnitName=QuizQuestion.TamilUnitNum,
                         MathsUnitName=QuizQuestion.MathsUnitNum
-                        }
-                };                       
+                },
+                CreatedAt = DateTime.UtcNow,
+                LastModifiedAt = DateTime.UtcNow
+            };
+            if (!string.IsNullOrEmpty(QuizQuestion.AnswerKeyExplanationHtml))
+            {
+                newQuestion.AnswerKeyExplanation = new AnswerKeyExplanation
+                {
+                    QuestionId = newQuestion.Id,
+                    AnswerKeyExplanationHtml = QuizQuestion.AnswerKeyExplanationHtml
+                };
+            }                 
             _dbContext.Quiz.Add(newQuestion);
             _dbContext.SaveChanges();
             return Ok(newQuestion);
@@ -90,9 +102,41 @@ namespace QuizApi.Controllers
         [HttpPut]
         public IActionResult UpdateQuestion(Quiz UpdatedQueston)
         {
-            _dbContext.Quiz.Update(UpdatedQueston);
+            var existingQuiz = _dbContext.Quiz
+                .Include(x => x.AnswerKeyExplanation)
+                .FirstOrDefault(q => q.Id == UpdatedQueston.Id);
+
+            if (existingQuiz == null)
+                return NotFound();
+
+            // Update basic fields
+            existingQuiz.Question = UpdatedQueston.Question;
+            existingQuiz.CorrectOptionType = UpdatedQueston.CorrectOptionType;
+            existingQuiz.LastModifiedAt = DateTime.UtcNow;
+
+            // Handle AnswerKeyExplanation: only update if explicitly provided
+            if (UpdatedQueston.AnswerKeyExplanation != null)
+            {
+                if (existingQuiz.AnswerKeyExplanation == null)
+                {
+                    // Create new explanation if it doesn't exist
+                    existingQuiz.AnswerKeyExplanation = new AnswerKeyExplanation
+                    {
+                        QuestionId = existingQuiz.Id,
+                        AnswerKeyExplanationHtml = UpdatedQueston.AnswerKeyExplanation.AnswerKeyExplanationHtml
+                    };
+                }
+                else
+                {
+                    // Update existing explanation
+                    existingQuiz.AnswerKeyExplanation.AnswerKeyExplanationHtml = 
+                        UpdatedQueston.AnswerKeyExplanation.AnswerKeyExplanationHtml;
+                }
+            }
+            // If UpdatedQueston.AnswerKeyExplanation is null, we do nothing (preserve existing)
+
             _dbContext.SaveChanges();
-            return Ok(UpdatedQueston);
+            return Ok(existingQuiz);
         }
     }
 }

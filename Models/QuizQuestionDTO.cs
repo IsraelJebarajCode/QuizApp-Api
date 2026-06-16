@@ -17,7 +17,8 @@ namespace QuizApi.Models
         public Part Section { get; set; }
         public GKUnit GKUnitNum { get; set; }
         public TamilUnit TamilUnitNum { get; set; }
-        public MathsUnit MathsUnitNum { get; set; }        
+        public MathsUnit MathsUnitNum { get; set; }
+        public string? AnswerKeyExplanationHtml { get; set; }      
     }
     
 }

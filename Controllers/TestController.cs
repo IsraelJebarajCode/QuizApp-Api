@@ -44,6 +44,7 @@ namespace QuizApi.Controllers
                                      .Include(x => x.Options)
                                      .Include(y => y.QnCorrectOption)
                                      .Include(z => z.QnCategory)
+                                     .Include(a=>a.AnswerKeyExplanation)
                                      .ToList();
 
             return Ok(TestQuestions);
